@@ -152,3 +152,38 @@ Hay que ejecutar `./bench.sh 2048` en el equipo del laboratorio y poner aquí lo
 
 > [!NOTE]
 > Los tiempos concretos dependen de la máquina. Hay que rellenar las tablas con la salida de `bench.sh` y comparar `MM` frente a `MMpar` (aceleración por paralelismo) y `MMpar` frente a `MMpar2` (aceleración por localidad/registros), para N = 2048 y 4096.
+
+## ANÀLISIS DE DATOS:
+| Codigo | Mtx Size | DQ | threads | CPU's | Tiempo | Nº Instrucciones |
+|---|---|---|---|---|---|---|
+| MM | 2048 | 0 | 1 | 1,0 | 17,21s | 73,9G |
+| MM | 2048| 2 | 1 | 1,0 | 5,77s |177,36G|
+| MM | 2048 | 4 | 1 | 10,27 | 1,13s |98,0G|
+| MM | 2048| 8 | 1 | 1,0 | 5,77s |79,8G|
+| MM | 2048 | 16 | 1 | 10,27 | 1,13s |73,9G|
+| MM | 2048 | 32 | 1 | 9,90 | 0,90s |71,4G|
+| MM | 2048 | 64 | 1 | 10,166 | 0,95s | 70,28G|
+| MM | 2048 | 128 | 1 | 10,0 | 0,98s |69,74G|
+| MM | 2048 | 256 | 1 | 10,27 | 2,33s |69,47G|
+| MM | 2048 | 512 | 1 | 9,371 | 2,60s |69,33G|
+| MM | 2048 | 1024 | 1 | 3,885 | 4,86s |69,27G|
+
+Observamos que dependiendo del DQSZ los tiempos de ejecución cambian. Con DQ bajos nuestro programa divide demasiado, es decir, que sigue hasta tener bloques my pequeños y el coste computacional de dividir es mayor al retorno que obtenemos ya que tenemos una cantidad de intrucciones muy elevada, en cambio con valores intermedios aprovechamos la paralelización al màximo, prescindiendo de ella para casos de matrices mas pequeñas cuando llegamos a ellas. En cambio, para valores mayores sucede lo contrario, observamos que a partir de DQ >= 256 el tiempo se dispara, esto es debido a que al tener DQ un valor tan alto, pasamos al caso base con una matriz enorme, lo que causa muchisimos fallos caché porque no cabe en L1 y L2.
+
+hay que destacar también que el numero de intrucciones aumentea a medida que reducimos el DQ, al estar dividiendo más, tenemos mas intrucciones que ejecutar, esto no significa que tardemos mas tiempo, no es proporcional.
+
+
+
+
+
+| Codigo | Mtx Size | DQ | threads | CPU's | Tiempo |
+|---|---|---|---|---|---|
+| MM | 2048 | 0 | 1 | 1,0 | 17,21s |
+| MM | 2048| 64 | 1 | 1,0 | 5,77s |
+| MM | 2048 | 16 | 12 | 10,27 | 1,13s |
+| MM | 2048 | 32 | 12 | 9,90 | 0,90s |
+| MM | 2048 | 64 | 12 | 10,166 | 0,95s | 
+| MM | 2048 | 128 | 12 | 10,0 | 0,98s |
+| MMpar | 2048 | 256 | 12 | 10,27 | 2,33s |
+| MMpar | 2048 | 512 | 12 | 9,371 | 2,60s |
+| MMpar | 2048 | 1024 | 12 | 3,885 | 4,86s |
